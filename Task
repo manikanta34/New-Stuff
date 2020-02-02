@@ -1,0 +1,15 @@
+private String getUserNotesfromAD(String userLogin,DirContext ldapContext,String baseDN) {
+		String adFilter="(&(objectClass=user)(sAMAccountName="+userLogin+"))";
+		String[] attrIDs= {"notes"};
+		String note=null;
+		NamingEnumeration<SearchResult> answer=ldap.getDataFromLDAP(ldapContext,baseDN,adFilter,attrIDs);
+		if(answer!=null) {
+			while(answer.hasMoreElements()) {
+				SearchResult sr=answer.next();
+				Attributes attrs=sr.getAttributes();
+				note=attrs.get("notes").get().toString();
+			}
+		}
+		return note;
+	}
+	
