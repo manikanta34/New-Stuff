@@ -1,0 +1,22 @@
+Requirement-1:
+==============
+Keep the Requirement-1 Sentence
+===============================
+1)As per the Requirement, we noticed two places(setFieldwithoutCompare,setFieldwithrentainolddatecompare) 
+where Notes is getting updated in process form.
+2)I have seperated the logic by comparing with fieldname, to update the notes field directly on AD.
+----If need please keep screenshots of both conditions.
+3)Implemented updateNotesAttributeinAD method to update the notes(info) in AD
+	1)Fetched DistinguishedName from process form using process instance key.
+	2)Esthablishing the AD Connection using ITresource key.
+	3)After Connection is esthablished, Updating the notes(info) value to AD directly.
+	
+Requirement-2:
+=============
+1)As per the Requirement, we noticed a place where notification has sent after role/Entitlement is revoked.
+----If need please keep screenshot where method is been called.
+2)Implemented updateNotesAttributeinAD method to update the notes(info) in AD
+	1)Fetched DistinguishedName from process form using process instance key.
+	2)Esthablishing the AD Connection using ITresource key.
+	3)After Connection is esthablished, Fetched the Notes(info) attribute from AD.
+	4)Updating the Notes(info) Attribute in AD.
