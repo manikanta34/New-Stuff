@@ -20,3 +20,20 @@ Requirement-2:
 	2)Esthablishing the AD Connection using ITresource key.
 	3)After Connection is esthablished, Fetched the Notes(info) attribute from AD.
 	4)Updating the Notes(info) Attribute in AD.
+
+
+
+//Disable user in OIM
+    public void disableUser(String userLogin) {
+        try{
+            //get user manager service
+            UserManager userManager = oimClient.getService(UserManager.class);
+            
+            userManager.disable(userLogin, true);
+            
+            System.out.print("Disabled User Successfully!!!");
+            
+        }catch(Exception e){
+            System.out.println("Error occured while disabling user - " + e);
+        }
+    }
