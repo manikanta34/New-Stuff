@@ -47,3 +47,42 @@ public static void revokeRoleGrant() {
 		}
 		return listOfUserKeys;
 	}
+	
+	
+	
+	public Set<String> getDatabaseConnection(String sqlQuery){
+	    com.thortech.xl.dataaccess.tcDataProvider dbProvider = null;
+		Set<String> listOfUserKeys = null;
+
+	    try{
+	        XLClientSecurityAssociation.setClientHandle(oimClient);
+	        dbProvider = new com.thortech.xl.client.dataobj.tcDataBaseClient();
+	        com.thortech.xl.dataaccess.tcDataSet usersDataSet = new com.thortech.xl.dataaccess.tcDataSet();
+	        usersDataSet.setQuery(dbProvider, sqlQuery);
+	        usersDataSet.executeQuery();
+			listOfUserKeys=new HashSet<>();
+	        int numRecords = usersDataSet.getTotalRowCount();
+	        for(int i = 0; i < numRecords; i++){
+	            usersDataSet.goToRow(i);
+				listOfUserKeys.add(usersDataSet.getString("USR_KEY"));
+	        }
+	    }
+	  
+	    catch(Exception e){
+	        System.out.println("Exception occured while getting user details" + e);
+	    }
+	    finally{
+	        if(dbProvider != null){
+	            try{
+	                dbProvider.close();
+	            } catch(Exception e) {
+	                System.out.println("Exception occured while closing connection" + e);
+	            }
+	        }
+	       
+	        XLClientSecurityAssociation.clearThreadLoginSession();  
+	    }
+	    return listOfUserKeys;
+	}
+	
+	
