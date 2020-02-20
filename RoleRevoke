@@ -17,6 +17,14 @@ public static void revokeRoleGrant() {
 		}
 	}
 	
+	public Long getRoleKeyByRoleName(String roleName) throws SearchKeyNotUniqueException, AccessDeniedException, NoSuchRoleException, RoleLookupException
+	    {
+	        HashSet retAttrs = new HashSet();
+	        retAttrs.add(RoleManagerConstants.RoleAttributeName.KEY.getId()); // Role Key
+	        Role role = roleMgrOps.getDetails(RoleManagerConstants.RoleAttributeName.NAME.getId(), roleName, retAttrs); // Search by role name attribute which is unique
+	        return Long.parseLong(role.getEntityId());
+	    }
+	
 	
 	
 	public Set<String> getUserKeysofAbove90Days(String sqlQuery) throws Exception {
