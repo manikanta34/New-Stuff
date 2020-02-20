@@ -1,0 +1,90 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Hashtable;
+import javax.security.auth.login.LoginException;
+import oracle.iam.platform.OIMClient;
+import oracle.iam.platform.pluginframework.PluginException;
+import oracle.iam.platformservice.api.PlatformService;
+import oracle.iam.platformservice.exception.PlatformServiceAccessDeniedException;
+
+public class PluginUtility {
+   
+    public static OIMClient getOIMConnection() {
+        Hashtable<Object, Object> env = new Hashtable<Object, Object>();
+        env.put(OIMClient.JAVA_NAMING_FACTORY_INITIAL,"weblogic.jndi.WLInitialContextFactory");
+        env.put(OIMClient.JAVA_NAMING_PROVIDER_URL,"<t3://oim url>");
+        System.setProperty("java.security.auth.login.config", "<authwl.conf path>");
+        System.setProperty("APPSERVER_TYPE", "wls");
+
+        OIMClient oimClient = new OIMClient(env);
+        try {
+            oimClient.login("<username>", "<password>".toCharArray());
+
+        } catch (LoginException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return oimClient;
+    }
+   
+    public void register() {
+        OIMClient oimClient = getOIMConnection();
+        System.out.println(new Date() + " : Connected");
+        System.out.println(new Date() + " : Registering the plugin");
+
+        String fileName = "<zip file path>";
+
+        PlatformService service = oimClient.getService(PlatformService.class);
+        File zipFile = new File(fileName);
+        FileInputStream fis;
+        try {
+            fis = new FileInputStream(zipFile);
+            int size = (int) zipFile.length();
+            byte[] b = new byte[size];
+            int bytesRead = fis.read(b, 0, size);
+            while (bytesRead < size) {
+                bytesRead += fis.read(b, bytesRead, size - bytesRead);
+            }
+            fis.close();
+            try {
+                service.registerPlugin(b);
+                System.out.println(new Date() + " :Plugin Registered");
+            } catch (PlatformServiceAccessDeniedException e) {
+                e.printStackTrace();
+            } catch (PluginException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+   
+    public void unregister(String pluginName, String pluginVer) {
+        OIMClient oimClient = getOIMConnection();
+        System.out.println(new Date() + " : Connected");
+        PlatformService service = oimClient.getService(PlatformService.class);
+        try {
+            System.out.println(new Date() + " :Un Registering the plugin");
+            service.unRegisterPlugin(pluginName,pluginVer);
+            System.out.println(new Date() + " : Plugin unregistered");
+        } catch (PlatformServiceAccessDeniedException e) {
+            e.printStackTrace();
+        } catch (PluginException e) {
+            e.printStackTrace();
+        }
+    }
+   
+   
+    public static void main(String[] args) {
+        PluginUtility plugin = new PluginUtility();
+        plugin.register();
+        //plugin.unregister(<pluginName>,<version>);
+    }
+}
