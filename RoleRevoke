@@ -16,3 +16,26 @@ public static void revokeRoleGrant() {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	
+	public Set<String> getUserKeysofAbove90Days(String sqlQuery) throws Exception {
+		Set<String> listOfUserKeys = null;
+		StringBuilder formStatement = null;
+		try {
+			try (Connection con = Platform.getConnection();
+					PreparedStatement stmt = con.prepareStatement(sqlQuery);
+					ResultSet rs = stmt.executeQuery();) {
+				listOfUserKeys=new HashSet<>();
+				if (rs != null) {
+					while (rs.next()) {
+						listOfUserKeys.add(rs.getString(1));
+
+					}
+				}
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+		return listOfUserKeys;
+	}
