@@ -31,7 +31,7 @@ public static void revokeRoleGrant() {
 		Set<String> listOfUserKeys = null;
 		StringBuilder formStatement = null;
 		try {
-			try (Connection con = Platform.getConnection();
+			try (Connection con = Platform.getOperationalDS().getConnection();
 					PreparedStatement stmt = con.prepareStatement(sqlQuery);
 					ResultSet rs = stmt.executeQuery();) {
 				listOfUserKeys=new HashSet<>();
