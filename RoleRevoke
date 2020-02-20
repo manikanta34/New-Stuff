@@ -1,0 +1,18 @@
+public static void revokeRoleGrant() {
+		RoleManager rolemanagersvc = oimClient.getService(RoleManager.class);
+		Set<String> roleKeys = new HashSet<String>();
+		roleKeys.add("");
+		roleKeys.add("");
+		Set<String> usrKeys = new HashSet<String>();
+		usrKeys.add("");
+		usrKeys.add("");
+		usrKeys.add("");
+		usrKeys.add("");
+		try {
+			for (String roleKey : roleKeys) {
+				rolemanagersvc.revokeRoleGrant(roleKey, usrKeys);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
