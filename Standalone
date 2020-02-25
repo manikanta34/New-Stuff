@@ -1,0 +1,100 @@
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class Standalone {
+	OIMClient oimClient = null;
+	String userName = "";
+	String password = "";
+	String OIMURL = "";
+	String authWLFile = "<DesignConsoleLocation>\\config\\authwl.conf";
+	List<String> ignoreRoles = new ArrayList<>();
+	ignoreRoles.add("All Users Birth Right");
+	ignoreRoles.add("Employee Birth Right");
+
+	public void revokeRoleFromUser(String roleName, String userKey, String roleKey) {
+		RoleManager roleMgrOps = oimClient.getService(RoleManager.class);
+		HashSet usrKeys = new HashSet();
+		usrKeys.add(userKey);
+		try {
+			if (!ignoreRoles.contains(roleName)) {
+				roleMgrOps.revokeRoleGrant(roleKey, usrKeys);
+			}
+		} catch (ValidationFailedException e) {
+		} catch (RoleGrantRevokeException e) {
+		}
+	}
+
+	public void getAllRoleMembershipOfAUser(String userKey) throws AccessDeniedException, UserMembershipException{
+		RoleManager roleMgrOps = oimClient.getService(RoleManager.class);
+		boolean getIndirectAndDirectRoleMembership = true;
+		List<Role> Roles = roleMgrOps.getUserMemberships(userKey, getIndirectAndDirectRoleMembership);
+		for(Role role:Roles) {
+			if(role.getName().contains(ignoreRoles)) {
+				revokeRoleFromUser(role.getName(), userKey, role.getEntityId());
+			}
+		}
+	}
+
+	public Long getRoleKeyByRoleName(String roleName)
+			throws SearchKeyNotUniqueException, AccessDeniedException, NoSuchRoleException, RoleLookupException {
+		HashSet retAttrs = new HashSet();
+		retAttrs.add(RoleManagerConstants.RoleAttributeName.KEY.getId()); // Role Key
+		Role role = roleMgrOps.getDetails(RoleManagerConstants.RoleAttributeName.NAME.getId(), roleName, retAttrs); // unique
+		return Long.parseLong(role.getEntityId());
+	}
+
+	public Set<String> getDatabaseConnection(String sqlQuery) {
+		com.thortech.xl.dataaccess.tcDataProvider dbProvider = null;
+		Set<String> listOfUserKeys = null;
+		try {
+			XLClientSecurityAssociation.setClientHandle(oimClient);
+			dbProvider = new com.thortech.xl.client.dataobj.tcDataBaseClient();
+			com.thortech.xl.dataaccess.tcDataSet usersDataSet = new com.thortech.xl.dataaccess.tcDataSet();
+			usersDataSet.setQuery(dbProvider, sqlQuery);
+			usersDataSet.executeQuery();
+			listOfUserKeys = new HashSet<>();
+			int numRecords = usersDataSet.getTotalRowCount();
+			for (int i = 0; i < numRecords; i++) {
+				usersDataSet.goToRow(i);
+				listOfUserKeys.add(usersDataSet.getString("USR_KEY"));
+			}
+		}
+
+		catch (Exception e) {
+			System.out.println("Exception occured while getting user details" + e);
+		} finally {
+			if (dbProvider != null) {
+				try {
+					dbProvider.close();
+				} catch (Exception e) {
+					System.out.println("Exception occured while closing connection" + e);
+				}
+			}
+
+			XLClientSecurityAssociation.clearThreadLoginSession();
+		}
+		return listOfUserKeys;
+	}
+
+	public void OIMConnection() {
+		Hashtable<Object, Object> env = new Hashtable<Object, Object>();
+		env.put(OIMClient.JAVA_NAMING_FACTORY_INITIAL, "weblogic.jndi.WLInitialContextFactory");
+		env.put(OIMClient.JAVA_NAMING_PROVIDER_URL, OIMURL);
+		System.setProperty("java.security.auth.login.config", authWLFile);
+		System.setProperty("Context.PROVIDER_URL", OIMURL);
+		System.setProperty("APPSERVER_TYPE", "wls");
+		oimClient = new OIMClient(env);
+		try {
+			oimClient.login(userName, password.toCharArray());
+			System.out.println("Successfully Connected with OIM ");
+		} catch (LoginException e) {
+			System.err.println("Login Exception " + e.getMessage());
+		} catch (Exception e) {
+			System.err.println("Exception " + e.getMessage());
+		}
+		System.out.println("End of getOIMConnection");
+	}
+
+}
