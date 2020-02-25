@@ -1,0 +1,74 @@
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+public class RevokeRoleForUserAfter90Days extends TaskSupport {
+
+	@Override
+	public void execute(HashMap attributes) throws Exception {
+		String lookupName = attributes.get("LOOKUP NAME").toString();
+		HashMap<String, String> lookUpValues = getLookupMap(lookupName);
+		String sqlQuery = lookUpValues.get("SQL QUERY").toString();
+		Set<String> userKeys = getUserKeysofAbove90Days(sqlQuery);
+	}
+
+	public Set<String> getUserKeysofAbove90Days(String sqlQuery) throws Exception {
+		Set<String> listOfUserKeys = null;
+		StringBuilder formStatement = null;
+		try (Connection con = Platform.getOperationalDS().getConnection();
+				PreparedStatement stmt = con.prepareStatement(sqlQuery);
+				ResultSet rs = stmt.executeQuery();) {
+			listOfUserKeys = new HashSet<>();
+			if (rs != null) {
+				while (rs.next()) {
+					listOfUserKeys.add(rs.getString(1));
+
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("EXCEPTION OCCURED IN GETTING USERS FROM DB " + e);
+			throw e;
+		}
+		return listOfUserKeys;
+	}
+
+	public Map<String, String> getLookupMap(String lookupName) {
+		Map<String, String> lookupMap = new HashMap<String, String>();
+		tcLookupOperationsIntf lookupService = Platform.getService(tcLookupOperationsIntf.class);
+		try {
+			tcResultSet resultSet = lookupService.getLookupValues(lookupName);
+			String codeKey, meaningValue;
+			for (int i = 0; i < resultSet.getRowCount(); i++) {
+				resultSet.goToRow(i);
+				codeKey = resultSet.getStringValue("Lookup Definition.Lookup Code Information.Code Key");
+				meaningValue = resultSet.getStringValue("Lookup Definition.Lookup Code Information.Decode");
+				lookupMap.put(codeKey, meaningValue);
+			}
+		} catch (tcAPIException e) {
+			System.out.println("EXCEPTION OCCURED IN GETTING LOOKUP VALUES " + e);
+			throw e;
+		} catch (tcInvalidLookupException e) {
+			System.out.println("EXCEPTION OCCURED IN GETTING LOOKUP VALUES " + e);
+			throw e;
+		} catch (tcColumnNotFoundException e) {
+			System.out.println("EXCEPTION OCCURED IN GETTING LOOKUP VALUES " + e);
+			throw e;
+		}
+		return lookupMap;
+	}
+
+	@Override
+	public HashMap getAttributes() {
+		return null;
+	}
+
+	@Override
+	public void setAttributes() {
+
+	}
+
+}
