@@ -1,0 +1,58 @@
+
+TestData:
+Full Reconciliation:
+===============================
+1)Open Clone Job.
+2)Update the Latest Token,Filter and Search Base Parameters to empty.
+3)Run the scheduler.
+Expected Result:
+AD and IES should be in sync.
+Latest Token must be updated to maximum value which is the lastest uSNChanged value of AD Object User.
+
+Full Reconciliation:
+================================
+1)Open custom scheduler
+2)update Latest uSNChanged Token Parameter to "0";
+3)Run The scheduler
+Expected Result:
+Latest uSNChnaged Token must be updated to maximum value which is the lastest uSNChanged value of AD Object Group.
+
+
+Increemental Reconciliation1:
+=================================
+1)Consider one user<userid> who has AD Account.
+2)open the user in AD.
+3)remove one group for that user
+4)Run the Custom scheduler
+Expected Result:
+=================
+1)Latest uSNChnaged Token must be updated to maximum value which is the lastest uSNChanged value of AD Object Group.
+2)Filter must contain 
+
+equalTo('sAMAccountName','<userid')
+and Latest Token should be updated to empty
+after this 
+5)Run the Clone job.
+Expected Result
+================
+recon event has to generated for the considered user and his entitlment should be deleted from IES
+
+
+Increemental Reconciliation2:
+=================================
+1)Consider one user<userid> who has AD Account.
+2)open the user in AD.
+3)add one group for that user
+4)Run the Custom scheduler
+Expected Result:
+=================
+1)Latest uSNChnaged Token must be updated to maximum value which is the lastest uSNChanged value of AD Object Group.
+2)Filter must contain 
+
+equalTo('sAMAccountName','<userid')
+and Latest Token should be updated to empty
+after this 
+5)Run the Clone job.
+Expected Result
+================
+recon event has to generated for the considered user and his entitlment should be added from IES
