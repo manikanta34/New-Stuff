@@ -1,0 +1,24 @@
+public void removeLookupValue(String Key, String Lookup, boolean caseSensitive) {
+    final String logp = CN + "::removeLookupValue - ";
+    LOGGER.debug(logp + "START");
+    Map searchFor = new HashMap();
+    searchFor.put("Lookup Definition.Lookup Code Information.Code Key", Key);
+    tcLookupOperationsIntf lookupService = null;
+    try {
+        lookupService = (tcLookupOperationsIntf) Platform.getService(tcLookupOperationsIntf.class);
+        tcResultSet results = lookupService.getLookupValues(Lookup, searchFor);
+        for (int i = 0; i < results.getRowCount(); i++) {
+            results.goToRow(i);
+            String key = results.getStringValue("Lookup Definition.Lookup Code Information.Code Key");
+            if (!caseSensitive && key.equalsIgnoreCase(Key)) {
+                lookupService.removeLookupValue(Lookup, key);
+            } else if (caseSensitive && key.equals(Key)) {
+                lookupService.removeLookupValue(Lookup, key);
+            }
+        }
+    } catch (Exception e) {
+        LOGGER.error(logp + "Exception occurred - " + e.getMessage(), e);
+    }
+
+    LOGGER.debug("END");
+}
