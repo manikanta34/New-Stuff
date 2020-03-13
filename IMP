@@ -1,0 +1,18 @@
+SELECT ORC_KEY
+FROM ORC,PKG,USR
+WHERE ORC.PKG_KEY=PKG.PKG_KEY
+AND ORC.USR_KEY=USR.USR_KEY
+AND PKG_NAME='AD User'
+AND USR_LOGIN=’TESTUSER’;
+
+
+public void updateProcessFormData(long pkey, Map updateProFrmDataMap){
+          tcFormInstanceOperationsIntf formInstanceIntf = oimClient.getService(tcFormInstanceOperationsIntf.class);
+          try {
+         System.out.println("Update Process From Data Map :: " + updateProFrmDataMap);
+            formInstanceIntf.setProcessFormData(pkey, updateProFrmDataMap);
+            System.out.println("Process form data updated successfully");
+          } catch(Exception e){
+         e.printStackTrace();
+          }
+       }
