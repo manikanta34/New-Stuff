@@ -6,6 +6,18 @@ AND PKG_NAME='AD User'
 AND USR_LOGIN=’TESTUSER’;
 
 
+Select usr.usr_login, obj.obj_name, app_instance.app_instance_display_name, orc.orc_tos_instance_key, ost.ost_status 
+from usr, oiu, ost,orc, obi, obj, app_instance 
+where oiu.usr_key=usr.usr_key 
+and ost.ost_key=oiu.ost_key 
+and oiu.obi_key=obi.obi_key 
+and obi.obj_key=obj.obj_key 
+and app_instance.app_instance_key=oiu.app_instance_key 
+and orc.orc_key=oiu.orc_key 
+and app_instance.app_instance_display_name='Active Directory NA'
+and ost.ost_status in ('Provisioned','Enabled');
+--and usr.usr_login='A00012';
+
 public void updateProcessFormData(long pkey, Map updateProFrmDataMap){
           tcFormInstanceOperationsIntf formInstanceIntf = oimClient.getService(tcFormInstanceOperationsIntf.class);
           try {
