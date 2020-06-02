@@ -1,0 +1,35 @@
+public void readChildFormData(long processInstanceKey) throws Exception{
+  String childTableName = "UD_LDAP_ROL"; //child table name
+  String childTableColumnName = "UD_LDAP_ROL_ROLE_NAME";//column name
+ 
+  tcFormInstanceOperationsIntf formInstanceOperationsIntf = Platform.getService(Thor.API.Operations.tcFormInstanceOperationsIntf.class);
+  
+  long processFormDefinitionKey = formInstanceOperationsIntf.getProcessFormDefinitionKey(processInstanceKey);
+  int processParentFormVersion = formInstanceOperationsIntf.getActiveVersion(processFormDefinitionKey);
+  
+  tcResultSet resultGetChildFormDefinition = formInstanceOperationsIntf.getChildFormDefinition(processFormDefinitionKey, processParentFormVersion);
+
+  for(int j = 0; j < resultGetChildFormDefinition.getRowCount(); j++){
+   resultGetChildFormDefinition.goToRow(j);
+   
+   long childFormKey = resultGetChildFormDefinition.getLongValue("Structure Utility.Child Tables.Child Key");
+   int version = resultGetChildFormDefinition.getIntValue("Structure Utility.Child Tables.Child Version");
+   String childFrmName = resultGetChildFormDefinition.getStringValue("Structure Utility.Table Name");
+   
+   System.out.println("**********************************");
+   System.out.println("Child Form Key :: " + childFormKey);
+   System.out.println("Child Form Name :: " + childFrmName);
+   System.out.println("Active Form Version :: " + version);
+   System.out.println("**********************************");
+   
+   if(childFrmName.equalsIgnoreCase(childTableName)){
+    tcResultSet childData = formInstanceOperationsIntf.getProcessFormChildData(childFormKey, processInstanceKey);
+    
+    for(int k = 0; k < childData.getRowCount(); k++){
+     childData.goToRow(k);
+     String value = childData.getStringValue(childTableColumnName);
+     System.out.println(value);
+    }
+   }
+  }
+}
