@@ -1,0 +1,124 @@
+mport java.util.Date;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
+import javax.security.auth.login.LoginException;
+import oracle.iam.platform.OIMClient;
+import oracle.iam.platformservice.api.PlatformUtilsService;
+import oracle.iam.platformservice.exception.PlatformServiceException;
+import oracle.iam.platformservice.vo.JarElement;
+
+public class CustomJarUtilities {
+       static OIMClient oimClient = null;
+        
+        //identity self service details
+        String username = "xelsysadm";
+        String password = "<password>"; //xelsysadm password
+        String t3url = "t3://<hostname>:<port>"; //OIM HostName and Port
+        String authwl_location = "<location of authwl.conf file in your local machine>"; //eg. D:\\authwl.conf
+        
+ public void getOIMConnection() {
+            System.out.println("getOIMConnection() : Start");
+            //set system properties
+            System.setProperty("java.security.auth.login.config", authwl_location);
+            System.setProperty("OIM.AppServerType", "wls");
+            System.setProperty("APPSERVER_TYPE", "wls");
+    
+            Hashtable oimenv = new Hashtable();
+            oimenv.put(OIMClient.JAVA_NAMING_FACTORY_INITIAL, "weblogic.jndi.WLInitialContextFactory");
+            oimenv.put(OIMClient.JAVA_NAMING_PROVIDER_URL,t3url); 
+            oimClient = new OIMClient(oimenv);
+            try {
+                oimClient.login(username, password.toCharArray());
+                System.out.println("Connected");
+            } catch (LoginException e) {
+                e.printStackTrace();
+            }
+            System.out.println("getOIMConnection() : End");
+        }
+ 
+ public void uploadJar(PlatformUtilsService service, String jarType, String jarPath){
+            System.out.println("uploadJar() : Start");
+            System.out.println("Jar Path : " + jarPath);
+            System.out.println("Jar Type : " + jarType);
+            Set<JarElement> jarElement = new HashSet<JarElement>();
+            JarElement elem = new JarElement();
+            elem.type = jarType;
+            elem.path = jarPath;
+            jarElement.add(elem);
+            try {
+                    service.uploadJars(jarElement);
+            } catch (PlatformServiceException e) {
+                    System.out.println("Upload Jar Operation Failed ...");
+                    e.printStackTrace();
+            }
+            System.out.println("Jar Uploaded Successfully ...");
+     System.out.println("uploadJar() : End");
+ }
+ 
+ public void updateJar(PlatformUtilsService service, String jarType, String jarPath){
+            System.out.println("updateJar() : Start");
+            System.out.println("Jar Path : " + jarPath);
+            System.out.println("Jar Type : " + jarType);
+            Set<JarElement> jarElement = new HashSet<JarElement>();
+            JarElement elem = new JarElement();
+            elem.type = jarType;
+            elem.path = jarPath;
+            jarElement.add(elem);
+            try {
+                    service.updateJars(jarElement);
+            } catch (PlatformServiceException e) {
+                    System.out.println("Update Jar Operation Failed ...");
+                    e.printStackTrace();
+            }
+            System.out.println("Jar Updated Successfully ...");
+     System.out.println("updateJar() : End");
+ }
+ 
+ public void deleteJar(PlatformUtilsService service, String jarType, String jarPath){
+            System.out.println("deleteJar() : Start");
+            System.out.println("Jar Path : " + jarPath);
+            System.out.println("Jar Type : " + jarType);
+            Set<JarElement> jarElement = new HashSet<JarElement>();
+            JarElement elem = new JarElement();
+            elem.type = jarType;
+            elem.path = jarPath;
+            jarElement.add(elem);
+            try {
+                    service.deleteJars(jarElement);
+            } catch (PlatformServiceException e) {
+                    System.out.println("Delete Jar Operation Failed ...");
+                    e.printStackTrace();
+            }
+            System.out.println("Jar Deleted Successfully ..."); 
+            System.out.println("deleteJar() : End");
+        }
+        
+ public static void main(String[] args) {
+             CustomJarUtilities customJarUtility = new CustomJarUtilities();
+             customJarUtility.getOIMConnection();
+             if(oimClient != null){
+                PlatformUtilsService service = (PlatformUtilsService)oimClient.getService(PlatformUtilsService.class);
+                
+                //Possible Values : "JavaTasks" , "ICFBundle", "ScheduleTask", "ThirdParty";
+                String jarType = "JavaTasks";
+                
+                //The Jars location should be on the OIM installed machine
+                String jarPath = "/home/oracle/customJars/test.jar";
+                
+                /******** Upload Jar ********/
+                customJarUtility.uploadJar(service, jarType, jarPath);
+                
+                /******** Update Jar ********/
+                customJarUtility.updateJar(service, jarType, jarPath);
+                 
+                /******** Delete Jar ********/
+                customJarUtility.deleteJar(service, jarType, jarPath);
+                 
+                oimClient.logout();
+             }
+             else{
+                     System.out.println(new Date() +" oimClient is null");
+             } 
+ }
+}
